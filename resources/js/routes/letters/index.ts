@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\LetterController::compose
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/compose'
 */
 export const compose = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ compose.definition = {
 
 /**
 * @see \App\Http\Controllers\LetterController::compose
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/compose'
 */
 compose.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ compose.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\LetterController::compose
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/compose'
 */
 compose.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ compose.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\LetterController::compose
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/compose'
 */
 compose.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ compose.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\LetterController::compose
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/compose'
 */
 const composeForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -55,7 +55,7 @@ const composeForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> =>
 
 /**
 * @see \App\Http\Controllers\LetterController::compose
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/compose'
 */
 composeForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -65,7 +65,7 @@ composeForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\LetterController::compose
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/compose'
 */
 composeForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ compose.form = composeForm
 
 /**
 * @see \App\Http\Controllers\LetterController::acknowledge
-* @see app/Http/Controllers/LetterController.php:159
+* @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
 export const acknowledge = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -97,7 +97,7 @@ acknowledge.definition = {
 
 /**
 * @see \App\Http\Controllers\LetterController::acknowledge
-* @see app/Http/Controllers/LetterController.php:159
+* @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
 acknowledge.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -130,7 +130,7 @@ acknowledge.url = (args: { letter: string | number | { id: string | number } } |
 
 /**
 * @see \App\Http\Controllers\LetterController::acknowledge
-* @see app/Http/Controllers/LetterController.php:159
+* @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
 acknowledge.post = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -140,7 +140,7 @@ acknowledge.post = (args: { letter: string | number | { id: string | number } } 
 
 /**
 * @see \App\Http\Controllers\LetterController::acknowledge
-* @see app/Http/Controllers/LetterController.php:159
+* @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
 const acknowledgeForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -150,7 +150,7 @@ const acknowledgeForm = (args: { letter: string | number | { id: string | number
 
 /**
 * @see \App\Http\Controllers\LetterController::acknowledge
-* @see app/Http/Controllers/LetterController.php:159
+* @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
 acknowledgeForm.post = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -162,7 +162,7 @@ acknowledge.form = acknowledgeForm
 
 /**
 * @see \App\Http\Controllers\LetterController::index
-* @see app/Http/Controllers/LetterController.php:18
+* @see app/Http/Controllers/LetterController.php:20
 * @route '/letters'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -177,7 +177,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\LetterController::index
-* @see app/Http/Controllers/LetterController.php:18
+* @see app/Http/Controllers/LetterController.php:20
 * @route '/letters'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -186,7 +186,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\LetterController::index
-* @see app/Http/Controllers/LetterController.php:18
+* @see app/Http/Controllers/LetterController.php:20
 * @route '/letters'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -196,7 +196,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\LetterController::index
-* @see app/Http/Controllers/LetterController.php:18
+* @see app/Http/Controllers/LetterController.php:20
 * @route '/letters'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -206,7 +206,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\LetterController::index
-* @see app/Http/Controllers/LetterController.php:18
+* @see app/Http/Controllers/LetterController.php:20
 * @route '/letters'
 */
 const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -216,7 +216,7 @@ const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => (
 
 /**
 * @see \App\Http\Controllers\LetterController::index
-* @see app/Http/Controllers/LetterController.php:18
+* @see app/Http/Controllers/LetterController.php:20
 * @route '/letters'
 */
 indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -226,7 +226,7 @@ indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\LetterController::index
-* @see app/Http/Controllers/LetterController.php:18
+* @see app/Http/Controllers/LetterController.php:20
 * @route '/letters'
 */
 indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -243,7 +243,7 @@ index.form = indexForm
 
 /**
 * @see \App\Http\Controllers\LetterController::create
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/create'
 */
 export const create = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -258,7 +258,7 @@ create.definition = {
 
 /**
 * @see \App\Http\Controllers\LetterController::create
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/create'
 */
 create.url = (options?: RouteQueryOptions) => {
@@ -267,7 +267,7 @@ create.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\LetterController::create
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/create'
 */
 create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -277,7 +277,7 @@ create.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\LetterController::create
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/create'
 */
 create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -287,7 +287,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\LetterController::create
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/create'
 */
 const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -297,7 +297,7 @@ const createForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => 
 
 /**
 * @see \App\Http\Controllers\LetterController::create
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/create'
 */
 createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -307,7 +307,7 @@ createForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\LetterController::create
-* @see app/Http/Controllers/LetterController.php:68
+* @see app/Http/Controllers/LetterController.php:61
 * @route '/letters/create'
 */
 createForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -324,7 +324,7 @@ create.form = createForm
 
 /**
 * @see \App\Http\Controllers\LetterController::store
-* @see app/Http/Controllers/LetterController.php:74
+* @see app/Http/Controllers/LetterController.php:67
 * @route '/letters'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -339,7 +339,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\LetterController::store
-* @see app/Http/Controllers/LetterController.php:74
+* @see app/Http/Controllers/LetterController.php:67
 * @route '/letters'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -348,7 +348,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\LetterController::store
-* @see app/Http/Controllers/LetterController.php:74
+* @see app/Http/Controllers/LetterController.php:67
 * @route '/letters'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -358,7 +358,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\LetterController::store
-* @see app/Http/Controllers/LetterController.php:74
+* @see app/Http/Controllers/LetterController.php:67
 * @route '/letters'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -368,7 +368,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\LetterController::store
-* @see app/Http/Controllers/LetterController.php:74
+* @see app/Http/Controllers/LetterController.php:67
 * @route '/letters'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -380,7 +380,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\LetterController::show
-* @see app/Http/Controllers/LetterController.php:149
+* @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
 export const show = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -395,7 +395,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\LetterController::show
-* @see app/Http/Controllers/LetterController.php:149
+* @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
 show.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -428,7 +428,7 @@ show.url = (args: { letter: string | number | { id: string | number } } | [lette
 
 /**
 * @see \App\Http\Controllers\LetterController::show
-* @see app/Http/Controllers/LetterController.php:149
+* @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
 show.get = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -438,7 +438,7 @@ show.get = (args: { letter: string | number | { id: string | number } } | [lette
 
 /**
 * @see \App\Http\Controllers\LetterController::show
-* @see app/Http/Controllers/LetterController.php:149
+* @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
 show.head = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -448,7 +448,7 @@ show.head = (args: { letter: string | number | { id: string | number } } | [lett
 
 /**
 * @see \App\Http\Controllers\LetterController::show
-* @see app/Http/Controllers/LetterController.php:149
+* @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
 const showForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -458,7 +458,7 @@ const showForm = (args: { letter: string | number | { id: string | number } } | 
 
 /**
 * @see \App\Http\Controllers\LetterController::show
-* @see app/Http/Controllers/LetterController.php:149
+* @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
 showForm.get = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -468,7 +468,7 @@ showForm.get = (args: { letter: string | number | { id: string | number } } | [l
 
 /**
 * @see \App\Http\Controllers\LetterController::show
-* @see app/Http/Controllers/LetterController.php:149
+* @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
 showForm.head = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -485,7 +485,7 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\LetterController::edit
-* @see app/Http/Controllers/LetterController.php:111
+* @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
 export const edit = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -500,7 +500,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\LetterController::edit
-* @see app/Http/Controllers/LetterController.php:111
+* @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
 edit.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -533,7 +533,7 @@ edit.url = (args: { letter: string | number | { id: string | number } } | [lette
 
 /**
 * @see \App\Http\Controllers\LetterController::edit
-* @see app/Http/Controllers/LetterController.php:111
+* @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
 edit.get = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -543,7 +543,7 @@ edit.get = (args: { letter: string | number | { id: string | number } } | [lette
 
 /**
 * @see \App\Http\Controllers\LetterController::edit
-* @see app/Http/Controllers/LetterController.php:111
+* @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
 edit.head = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -553,7 +553,7 @@ edit.head = (args: { letter: string | number | { id: string | number } } | [lett
 
 /**
 * @see \App\Http\Controllers\LetterController::edit
-* @see app/Http/Controllers/LetterController.php:111
+* @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
 const editForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -563,7 +563,7 @@ const editForm = (args: { letter: string | number | { id: string | number } } | 
 
 /**
 * @see \App\Http\Controllers\LetterController::edit
-* @see app/Http/Controllers/LetterController.php:111
+* @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
 editForm.get = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -573,7 +573,7 @@ editForm.get = (args: { letter: string | number | { id: string | number } } | [l
 
 /**
 * @see \App\Http\Controllers\LetterController::edit
-* @see app/Http/Controllers/LetterController.php:111
+* @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
 editForm.head = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -590,7 +590,7 @@ edit.form = editForm
 
 /**
 * @see \App\Http\Controllers\LetterController::update
-* @see app/Http/Controllers/LetterController.php:118
+* @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
 export const update = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -605,7 +605,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\LetterController::update
-* @see app/Http/Controllers/LetterController.php:118
+* @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
 update.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -638,7 +638,7 @@ update.url = (args: { letter: string | number | { id: string | number } } | [let
 
 /**
 * @see \App\Http\Controllers\LetterController::update
-* @see app/Http/Controllers/LetterController.php:118
+* @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
 update.put = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -648,7 +648,7 @@ update.put = (args: { letter: string | number | { id: string | number } } | [let
 
 /**
 * @see \App\Http\Controllers\LetterController::update
-* @see app/Http/Controllers/LetterController.php:118
+* @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
 update.patch = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -658,7 +658,7 @@ update.patch = (args: { letter: string | number | { id: string | number } } | [l
 
 /**
 * @see \App\Http\Controllers\LetterController::update
-* @see app/Http/Controllers/LetterController.php:118
+* @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
 const updateForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -673,7 +673,7 @@ const updateForm = (args: { letter: string | number | { id: string | number } } 
 
 /**
 * @see \App\Http\Controllers\LetterController::update
-* @see app/Http/Controllers/LetterController.php:118
+* @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
 updateForm.put = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -688,7 +688,7 @@ updateForm.put = (args: { letter: string | number | { id: string | number } } | 
 
 /**
 * @see \App\Http\Controllers\LetterController::update
-* @see app/Http/Controllers/LetterController.php:118
+* @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
 updateForm.patch = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -787,6 +787,96 @@ destroyForm.delete = (args: { letter: string | number } | [letter: string | numb
 
 destroy.form = destroyForm
 
+/**
+* @see \App\Http\Controllers\LetterController::cancel
+* @see app/Http/Controllers/LetterController.php:198
+* @route '/letters/{letter}/cancel'
+*/
+export const cancel = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: cancel.url(args, options),
+    method: 'patch',
+})
+
+cancel.definition = {
+    methods: ["patch"],
+    url: '/letters/{letter}/cancel',
+} satisfies RouteDefinition<["patch"]>
+
+/**
+* @see \App\Http\Controllers\LetterController::cancel
+* @see app/Http/Controllers/LetterController.php:198
+* @route '/letters/{letter}/cancel'
+*/
+cancel.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { letter: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { letter: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            letter: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        letter: typeof args.letter === 'object'
+        ? args.letter.id
+        : args.letter,
+    }
+
+    return cancel.definition.url
+            .replace('{letter}', parsedArgs.letter.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\LetterController::cancel
+* @see app/Http/Controllers/LetterController.php:198
+* @route '/letters/{letter}/cancel'
+*/
+cancel.patch = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: cancel.url(args, options),
+    method: 'patch',
+})
+
+/**
+* @see \App\Http\Controllers\LetterController::cancel
+* @see app/Http/Controllers/LetterController.php:198
+* @route '/letters/{letter}/cancel'
+*/
+const cancelForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: cancel.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PATCH',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\LetterController::cancel
+* @see app/Http/Controllers/LetterController.php:198
+* @route '/letters/{letter}/cancel'
+*/
+cancelForm.patch = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    action: cancel.url(args, {
+        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+            _method: 'PATCH',
+            ...(options?.query ?? options?.mergeQuery ?? {}),
+        }
+    }),
+    method: 'post',
+})
+
+cancel.form = cancelForm
+
 const letters = {
     compose: Object.assign(compose, compose),
     acknowledge: Object.assign(acknowledge, acknowledge),
@@ -797,6 +887,7 @@ const letters = {
     edit: Object.assign(edit, edit),
     update: Object.assign(update, update),
     destroy: Object.assign(destroy, destroy),
+    cancel: Object.assign(cancel, cancel),
 }
 
 export default letters

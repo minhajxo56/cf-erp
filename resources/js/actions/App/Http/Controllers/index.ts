@@ -7,6 +7,7 @@ import UserController from './UserController'
 import HolidayController from './HolidayController'
 import TourController from './TourController'
 import ActivityLogController from './ActivityLogController'
+import DepartmentController from './DepartmentController'
 import Settings from './Settings'
 
 const Controllers = {
@@ -19,6 +20,7 @@ const Controllers = {
     HolidayController: Object.assign(HolidayController, HolidayController),
     TourController: Object.assign(TourController, TourController),
     ActivityLogController: Object.assign(ActivityLogController, ActivityLogController),
+    DepartmentController: Object.assign(DepartmentController, DepartmentController),
     Settings: Object.assign(Settings, Settings),
 }
 

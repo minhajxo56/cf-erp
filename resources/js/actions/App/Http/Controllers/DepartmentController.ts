@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\DepartmentController::index
 * @see app/Http/Controllers/DepartmentController.php:15
@@ -712,15 +712,6 @@ syncManagersForm.post = (args: { department: string | number | { id: string | nu
 
 syncManagers.form = syncManagersForm
 
-const departments = {
-    index: Object.assign(index, index),
-    create: Object.assign(create, create),
-    store: Object.assign(store, store),
-    edit: Object.assign(edit, edit),
-    update: Object.assign(update, update),
-    destroy: Object.assign(destroy, destroy),
-    assignManagers: Object.assign(assignManagers, assignManagers),
-    syncManagers: Object.assign(syncManagers, syncManagers),
-}
+const DepartmentController = { index, create, store, edit, update, destroy, assignManagers, syncManagers }
 
-export default departments
+export default DepartmentController

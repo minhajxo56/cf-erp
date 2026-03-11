@@ -112,7 +112,7 @@ export function AppSidebar() {
                                 {group.items.map((item) => {
                                     const Icon = item.icon;
                                     return (
-                                        <SidebarMenuItem key={item.title}>
+                                         <SidebarMenuItem key={item.title}>
                                             <SidebarMenuButton asChild>
                                                 <Link href={item.href}>
                                                     <Icon />

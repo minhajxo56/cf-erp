@@ -2,10 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { 
-    ArrowLeft, Shield, User, Building2, Briefcase, 
-    Mail, Phone, Lock, Send, CheckCircle2 
-} from 'lucide-react';
+import { ArrowLeft, Shield, User, Building2, Briefcase, Mail, Phone, Send, CheckCircle2 } from 'lucide-react';
 import { ChevronStepper } from '@/components/ChevronStepper';
 
 interface Props {
@@ -14,23 +11,13 @@ interface Props {
     departments?: { id: number; name: string }[];
 }
 
-const mockRoles = [
-    { id: 1, name: 'Admin' }, { id: 2, name: 'CEO' },
-    { id: 3, name: 'HR' }, { id: 4, name: 'Team In-Charge' }, { id: 5, name: 'Employee' },
-];
-
-const mockDepartments = [
-    { id: 1, name: 'News' }, { id: 2, name: 'Video' },
-    { id: 3, name: 'Marketing' }, { id: 4, name: 'Design' }, { id: 5, name: 'HR & Admin' },
-];
-
 const formSteps = [
     { id: 1, title: 'Create / Update' },
     { id: 2, title: 'Save as Draft' },
     { id: 3, title: 'Save and Send' },
 ];
 
-export default function Form({ user, roles = mockRoles, departments = mockDepartments }: Props) {
+export default function Form({ user, roles = [], departments = [] }: Props) {
     const isEdit = !!user;
     const formRef = useRef<HTMLFormElement>(null);
     const [currentStep, setCurrentStep] = useState(1);
@@ -45,42 +32,34 @@ export default function Form({ user, roles = mockRoles, departments = mockDepart
         last_name: user?.last_name || '',
         email: user?.email || '',
         phone: user?.phone || '',
-        password: '',
-        password_confirmation: '',
         role_id: user?.role_id || '',
         department_id: user?.department_id || '',
         status: user?.status || 'active',
         joining_date: user?.joining_date || new Date().toISOString().split('T')[0],
+        action_type: 'draft',
     });
 
     const handleStepClick = (targetStep: number) => {
-        // Prevent unnecessary processing if clicking the active step
         if (targetStep === currentStep) return;
-
-        // Allow navigating back to Step 1 without validation
+        
         if (targetStep === 1) {
             setCurrentStep(1);
             return;
         }
 
-        // Native HTML5 Validation before moving forward
         if (!formRef.current?.reportValidity()) return;
 
-        // Inject the appropriate status into the payload seamlessly
-        const actionType = targetStep === 2 ? 'draft' : 'send';
+        const currentAction = targetStep === 2 ? 'draft' : 'send';
+        
         transform((currentData) => ({
             ...currentData,
-            action_type: actionType
+            action_type: currentAction
         }));
 
         const requestOptions = {
             preserveState: true,
             preserveScroll: true,
-            onSuccess: () => {
-                // If target is 2 (Draft), the UI stays in edit mode automatically.
-                // If target is 3 (Send), the UI will swap to the success screen.
-                setCurrentStep(targetStep);
-            },
+            onSuccess: () => setCurrentStep(targetStep),
         };
 
         if (isEdit) {
@@ -113,7 +92,6 @@ export default function Form({ user, roles = mockRoles, departments = mockDepart
                     </Link>
                 </div>
 
-                {/* Sole Navigation: The Interactive Visual Stepper */}
                 <div className="mb-8">
                     <ChevronStepper 
                         steps={formSteps} 
@@ -124,9 +102,6 @@ export default function Form({ user, roles = mockRoles, departments = mockDepart
                 </div>
 
                 <form ref={formRef} className="flex flex-col gap-6" onSubmit={e => e.preventDefault()}>
-                    
-                    {/* --- STEP 1 & 2: FORM / EDIT MODE --- */}
-                    {/* The form remains visible whether they are creating or just saved a draft */}
                     {(currentStep === 1 || currentStep === 2) && (
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
                             <div className="flex flex-col space-y-6 lg:col-span-3">
@@ -196,42 +171,6 @@ export default function Form({ user, roles = mockRoles, departments = mockDepart
                                                     />
                                                 </div>
                                                 {errors.phone && <p className="text-[0.8rem] font-medium text-red-500">{errors.phone}</p>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                                    <div className="border-b border-gray-200 p-6 dark:border-gray-800">
-                                        <h3 className="flex items-center text-lg font-semibold text-gray-900 dark:text-gray-50">
-                                            <Lock className="mr-2 h-5 w-5 text-gray-500 dark:text-gray-400" /> 
-                                            Authentication
-                                        </h3>
-                                    </div>
-                                    <div className="p-6">
-                                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium leading-none text-gray-900 dark:text-gray-100">
-                                                    Password {(isEdit || currentStep === 2) && <span className="ml-1 font-normal text-gray-500">(Leave blank to keep)</span>}
-                                                </label>
-                                                <input 
-                                                    type="password" 
-                                                    value={data.password}
-                                                    onChange={e => setData('password', e.target.value)}
-                                                    className="flex h-9 w-full rounded-md border border-gray-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:focus-visible:ring-gray-300"
-                                                    required={!isEdit && currentStep !== 2} 
-                                                />
-                                                {errors.password && <p className="text-[0.8rem] font-medium text-red-500">{errors.password}</p>}
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium leading-none text-gray-900 dark:text-gray-100">Confirm Password</label>
-                                                <input 
-                                                    type="password" 
-                                                    value={data.password_confirmation}
-                                                    onChange={e => setData('password_confirmation', e.target.value)}
-                                                    className="flex h-9 w-full rounded-md border border-gray-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:focus-visible:ring-gray-300"
-                                                    required={(!isEdit && currentStep !== 2) || !!data.password} 
-                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -315,8 +254,6 @@ export default function Form({ user, roles = mockRoles, departments = mockDepart
                         </div>
                     )}
 
-                    {/* --- STEP 3: DEDICATED SUCCESS TAB/VIEW --- */}
-                    {/* Hides the form entirely and displays the final status */}
                     {currentStep === 3 && (
                         <div className="rounded-lg border border-gray-200 bg-white p-10 shadow-sm dark:border-gray-800 dark:bg-gray-950 text-center max-w-4xl mx-auto w-full mt-4">
                             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30 mb-6 shadow-sm">
@@ -333,7 +270,6 @@ export default function Form({ user, roles = mockRoles, departments = mockDepart
                                 <div className="space-y-2">
                                     <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Employee Code</p>
                                     <p className="font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 py-1 rounded">
-                                        {/* Assuming backend generates this and returns it, otherwise placeholder */}
                                         Generated
                                     </p>
                                 </div>

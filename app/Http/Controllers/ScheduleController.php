@@ -13,6 +13,7 @@ use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class ScheduleController extends Controller
@@ -21,24 +22,45 @@ class ScheduleController extends Controller
     {
         $this->authorize('viewAny', Schedule::class);
 
-        $user = $request->user();
-        $deptQuery = Department::select('id', 'name')->where('is_active', true);
+        $user = $request->user()->load('role', 'employee');
+        $roleName = $user->role->name;
+        
+        // Define who gets full access and filtering
+        $isUpperManagement = in_array($roleName, ['Super_Admin', 'Admin', 'HR', 'CEO']);
+
+        $deptQuery = Department::select('id', 'name', 'type')->where('is_active', true);
         $teamQuery = User::with(['employee.department', 'role'])->whereHas('employee');
 
-        if ($user->role->name === 'Team_In_Charge') {
-            $deptId = $user->employee->department_id;
-            $deptQuery->where('id', $deptId);
-            $teamQuery->whereHas('employee', fn($q) => $q->where('department_id', $deptId));
+        if (!$isUpperManagement && $roleName === 'Team_In_Charge') {
+            // Fetch only departments they manage via the pivot table
+            $managedDeptIds = $user->managedDepartments()->pluck('departments.id')->toArray();
+            $deptQuery->whereIn('id', $managedDeptIds);
+            
+            // Team In Charge only sees employees in their managed departments, PLUS themselves
+            $teamQuery->where(function ($query) use ($managedDeptIds, $user) {
+                $query->whereHas('employee', function ($subQuery) use ($managedDeptIds) {
+                    $subQuery->whereIn('department_id', $managedDeptIds);
+                })->orWhere('users.id', $user->id);
+            });
         }
 
         $departments = $deptQuery->get();
-        $teamMembers = $teamQuery->get()->map(fn($u) => [
-            'id' => $u->id,
-            'name' => "{$u->employee->first_name} {$u->employee->last_name}",
-            'role' => $u->role->name ?? 'Employee',
-            'department_id' => $u->employee->department_id,
-            'type' => in_array($u->employee->department->name ?? '', ['Video', 'News']) ? 'field' : 'office',
-        ]);
+        
+        $teamMembers = $teamQuery->get()->map(function($u) {
+            // Parse the SET column ('office,field') from DB into a real array
+            $dbTypes = isset($u->employee->department->type) 
+                ? explode(',', $u->employee->department->type) 
+                : ['office'];
+
+            return [
+                'id' => $u->id,
+                'name' => "{$u->employee->first_name} {$u->employee->last_name}",
+                'email' => $u->email,
+                'role' => $u->role->name ?? 'Employee',
+                'department_id' => $u->employee->department_id,
+                'type' => $dbTypes, // Now an array: ['office'], ['field'], or ['office', 'field']
+            ];
+        });
 
         $userIds = $teamMembers->pluck('id')->toArray();
         $startDate = Carbon::today();
@@ -87,6 +109,7 @@ class ScheduleController extends Controller
             'teamMembers' => $teamMembers,
             'departments' => $departments,
             'initialAssignments' => (object)$assignments, 
+            'canFilterDepartments' => $isUpperManagement, // Pass this to UI to hide/show the dropdown
         ]);
     }
 
@@ -104,11 +127,18 @@ class ScheduleController extends Controller
 
         $isPublishing = $validated['action_type'] === 'send';
         $status = $isPublishing ? 'published' : 'draft';
-        $user = $request->user();
+        
+        $user = $request->user()->load('role');
+        $isUpperManagement = in_array($user->role->name, ['Super_Admin', 'Admin', 'HR', 'CEO']);
+        
+        $managedDeptIds = $user->role->name === 'Team_In_Charge' 
+            ? $user->managedDepartments()->pluck('departments.id')->toArray() 
+            : [];
 
         DB::beginTransaction();
         try {
             $affectedScheduleIds = [];
+            $scheduledUserIds = [];
 
             foreach ($assignments as $key => $data) {
                 if (!isset($data['type']) || $data['type'] === 'unassigned') continue;
@@ -118,7 +148,12 @@ class ScheduleController extends Controller
                 
                 if (!$targetUser || !$targetUser->employee) continue;
 
-                if ($user->role->name === 'Team_In_Charge' && $targetUser->employee->department_id !== $user->employee->department_id) continue;
+                // Security check: If Team In Charge, they can only schedule themselves OR their managed team
+                if (!$isUpperManagement && $user->role->name === 'Team_In_Charge') {
+                    if ($targetUser->id !== $user->id && !in_array($targetUser->employee->department_id, $managedDeptIds)) {
+                        continue; // Skip unauthorized assignment attempt
+                    }
+                }
 
                 $deptId = $targetUser->employee->department_id;
                 $schedule = Schedule::firstOrCreate([
@@ -128,6 +163,7 @@ class ScheduleController extends Controller
                 ], ['creator_id' => $user->id, 'status' => $status]);
 
                 $affectedScheduleIds[] = $schedule->id;
+                $scheduledUserIds[] = $targetUser->id;
 
                 if ($isPublishing && $schedule->status !== 'published') {
                     $schedule->update(['status' => 'published']);
@@ -161,6 +197,59 @@ class ScheduleController extends Controller
             }
 
             DB::commit();
+
+            // SEND EMAIL LOGIC
+            // SEND EMAIL LOGIC
+            if ($isPublishing) {
+                // 1. Fetch the actual users who were scheduled
+                $uniqueUserIds = array_unique($scheduledUserIds);
+                $scheduledUsers = User::with('employee')->whereIn('id', $uniqueUserIds)->get();
+
+                // 2. Extract unique dates for the table headers
+                $dates = collect(array_keys($assignments))->map(function ($key) {
+                    return explode('-', $key, 2)[1];
+                })->unique()->sort()->values()->toArray();
+
+                // 3. Format rows for the email table
+                $rows = [];
+                foreach ($assignments as $key => $data) {
+                    [$userId, $date] = explode('-', $key, 2);
+                    $targetUser = $scheduledUsers->firstWhere('id', $userId);
+                    
+                    if (!$targetUser) continue;
+                    $empName = $targetUser->employee->first_name . ' ' . $targetUser->employee->last_name;
+
+                    // Format the cell text based on shift type
+                    $cellText = 'Off';
+                    if ($data['type'] === 'office') {
+                        $cellText = collect($data['shifts'])
+                            ->map(fn($s) => $s['start'] . '-' . $s['end'])
+                            ->join(', ');
+                    } elseif ($data['type'] === 'field') {
+                        $cellText = collect($data['tasks'])
+                            ->map(fn($t) => '📍 ' . ($t['location'] ?: 'Field'))
+                            ->join('<br>');
+                    }
+
+                    $rows[$empName][$date] = $cellText;
+                }
+
+                $scheduleData = [
+                    'dates' => $dates,
+                    'rows' => $rows,
+                ];
+
+                $humanStartDate = Carbon::parse($dates[0] ?? now())->format('F j, Y');
+
+                // 4. Send the notification to all scheduled users via Queue
+                if ($scheduledUsers->isNotEmpty()) {
+                    \Illuminate\Support\Facades\Notification::send(
+                        $scheduledUsers, 
+                        new \App\Notifications\SchedulePublished($scheduleData, $user->name, $humanStartDate)
+                    );
+                }
+            }
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => 'Database Error: ' . $e->getMessage()]);

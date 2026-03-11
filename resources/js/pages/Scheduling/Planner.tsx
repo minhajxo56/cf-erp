@@ -1,8 +1,11 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { Clock, MapPin, Plus, Trash2, X, Coffee, Search, Building2, Users, CheckCircle2, FileArchive, Send } from 'lucide-react';
+import { 
+    Clock, MapPin, Plus, Trash2, X, Coffee, Search, 
+    Building2, Users, CheckCircle2, FileArchive, Send, RefreshCw, Check 
+} from 'lucide-react';
 import { ChevronStepper } from '@/components/ChevronStepper';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -12,11 +15,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const formSteps = [
     { id: 1, title: 'Draft Plan' },
-    { id: 2, title: 'Save as Draft' },
-    { id: 3, title: 'Publish Schedule' },
+    { id: 2, title: 'Publish Schedule' }, // Simplified steps since it auto-saves drafts
 ];
 
-type EmployeeType = 'office' | 'field';
 type ViewHorizon = 1 | 3 | 7;
 
 interface OfficeShift { start: string; end: string; }
@@ -37,7 +38,7 @@ interface TeamMember {
     id: number;
     name: string;
     role: string;
-    type: EmployeeType;
+    type: string[]; // Now an array of strings (e.g. ['office'], ['office', 'field'])
     department_id: number | null;
 }
 
@@ -45,16 +46,21 @@ interface PlannerProps {
     teamMembers: TeamMember[];
     departments: Department[];
     initialAssignments?: Record<string, AssignmentData>;
+    canFilterDepartments?: boolean; // Controls UI visibility based on permissions
 }
 
-export default function Planner({ teamMembers = [], departments = [], initialAssignments = {} }: PlannerProps) {
+export default function Planner({ teamMembers = [], departments = [], initialAssignments = {}, canFilterDepartments = false }: PlannerProps) {
     const [horizon, setHorizon] = useState<ViewHorizon>(1);
     const [assignments, setAssignments] = useState<Record<string, AssignmentData>>(initialAssignments);
     const [mobileActiveDate, setMobileActiveDate] = useState<string>('');
-    const [activeCell, setActiveCell] = useState<{ userId: number; date: string; empName: string; empType: EmployeeType } | null>(null);
+    const [activeCell, setActiveCell] = useState<{ userId: number; date: string; empName: string; empType: string[] } | null>(null);
     const [draftData, setDraftData] = useState<AssignmentData>({ type: 'unassigned' });
     const [isSaving, setIsSaving] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
+    
+    // Auto-save state
+    const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+    const isFirstRender = useRef(true);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDepartment, setSelectedDepartment] = useState<number | 'all'>('all');
@@ -62,7 +68,7 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
     const generatedDates = useMemo(() => {
         const dates = [];
         const today = new Date();
-        today.setDate(today.getDate() + 1);
+        today.setDate(today.getDate() + 1); // Start tomorrow
         
         for (let i = 0; i < horizon; i++) {
             const nextDate = new Date(today);
@@ -82,6 +88,32 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
         }
     }, [generatedDates, mobileActiveDate]);
 
+    // Auto-save effect
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        // Don't auto-save if we are already published
+        if (currentStep === 2) return;
+
+        setAutoSaveStatus('saving');
+        const timeoutId = setTimeout(() => {
+            router.post('/schedules', { assignments: assignments as any, action_type: 'draft' }, {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    setAutoSaveStatus('saved');
+                    setTimeout(() => setAutoSaveStatus('idle'), 3000);
+                },
+                onError: () => setAutoSaveStatus('idle')
+            });
+        }, 1000); // 1-second debounce
+
+        return () => clearTimeout(timeoutId);
+    }, [assignments]);
+
     const filteredTeamMembers = useMemo(() => {
         return teamMembers.filter(emp => {
             const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -95,10 +127,14 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
         const existing = assignments[key] || { type: 'unassigned' };
         
         if (existing.type === 'unassigned') {
-            setDraftData(emp.type === 'office' 
-                ? { type: 'office', shifts: [{ start: '09:00', end: '17:00' }] } 
-                : { type: 'field', tasks: [{ time: '10:00', location: '', task: '' }] }
-            );
+            // Default select based on what the employee is allowed to do
+            if (emp.type.includes('office')) {
+                setDraftData({ type: 'office', shifts: [{ start: '09:00', end: '17:00' }] });
+            } else if (emp.type.includes('field')) {
+                setDraftData({ type: 'field', tasks: [{ time: '10:00', location: '', task: '' }] });
+            } else {
+                setDraftData({ type: 'off' });
+            }
         } else {
             setDraftData(JSON.parse(JSON.stringify(existing)));
         }
@@ -107,6 +143,7 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
 
     const saveCell = () => {
         if (!activeCell) return;
+        // Updating state here will automatically trigger the useEffect auto-save
         setAssignments(prev => ({ ...prev, [`${activeCell.userId}-${activeCell.date}`]: draftData }));
         setActiveCell(null);
     };
@@ -119,14 +156,13 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
             return;
         }
 
-        const actionType = targetStep === 2 ? 'draft' : 'send';
-        
         setIsSaving(true);
-        router.post('/schedules', { assignments: assignments as any, action_type: actionType }, {
+        // Step 2 is now Publish
+        router.post('/schedules', { assignments: assignments as any, action_type: 'send' }, {
             preserveState: true,
             preserveScroll: true,
             onSuccess: () => {
-                setCurrentStep(targetStep);
+                setCurrentStep(2);
                 setIsSaving(false);
             },
             onError: () => setIsSaving(false)
@@ -177,7 +213,23 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
                 
                 <div className="mb-6 flex flex-col items-start justify-between space-y-4 md:flex-row md:items-center md:space-y-0">
                     <div className="space-y-1">
-                        <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">Master Planner</h1>
+                        <div className="flex items-center space-x-3">
+                            <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">Master Planner</h1>
+                            
+                            {/* Auto-save indicator */}
+                            <div className="flex items-center space-x-1.5 text-xs font-medium">
+                                {autoSaveStatus === 'saving' && (
+                                    <span className="flex items-center text-blue-600 dark:text-blue-400">
+                                        <RefreshCw className="mr-1 h-3 w-3 animate-spin" /> Saving draft...
+                                    </span>
+                                )}
+                                {autoSaveStatus === 'saved' && (
+                                    <span className="flex items-center text-green-600 dark:text-green-500">
+                                        <Check className="mr-1 h-3.5 w-3.5" /> Draft saved
+                                    </span>
+                                )}
+                            </div>
+                        </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Manage employee schedules and field deployments.</p>
                     </div>
                 </div>
@@ -191,20 +243,8 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
                     />
                 </div>
 
-                {(currentStep === 1 || currentStep === 2) && (
+                {currentStep === 1 && (
                     <>
-                        {currentStep === 2 && (
-                            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950 text-center">
-                                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
-                                    <FileArchive className="h-7 w-7 text-gray-600 dark:text-gray-300" />
-                                </div>
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Schedule Draft Saved</h2>
-                                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                    The current assignments are saved as a draft. You can continue editing below or click <strong>Publish Schedule</strong> to notify the team.
-                                </p>
-                            </div>
-                        )}
-
                         <div className="flex flex-col items-start justify-between space-y-4 md:flex-row md:items-center md:space-y-0">
                             <div className="flex w-full items-center justify-between md:w-auto md:justify-start md:space-x-4">
                                 <div className="inline-flex h-9 items-center justify-center rounded-lg bg-gray-100 p-1 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
@@ -232,27 +272,31 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
                                     />
                                 </div>
                                 
-                                <div className="relative w-full sm:w-48 flex-shrink-0">
-                                    <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
-                                    <select
-                                        value={selectedDepartment}
-                                        onChange={(e) => setSelectedDepartment(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                                        className="flex h-10 w-full appearance-none rounded-md border border-gray-200 bg-white pl-9 pr-8 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-900 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-100 dark:focus-visible:ring-gray-300"
-                                    >
-                                        <option value="all" className="dark:bg-gray-900">All Depts</option>
-                                        {departments.map(dept => (
-                                            <option key={dept.id} value={dept.id} className="dark:bg-gray-900">
-                                                {dept.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                {/* Only show department filter if they are permitted to see it */}
+                                {canFilterDepartments && (
+                                    <div className="relative w-full sm:w-48 flex-shrink-0">
+                                        <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" />
+                                        <select
+                                            value={selectedDepartment}
+                                            onChange={(e) => setSelectedDepartment(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+                                            className="flex h-10 w-full appearance-none rounded-md border border-gray-200 bg-white pl-9 pr-8 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-900 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-100 dark:focus-visible:ring-gray-300"
+                                        >
+                                            <option value="all" className="dark:bg-gray-900">All Depts</option>
+                                            {departments.map(dept => (
+                                                <option key={dept.id} value={dept.id} className="dark:bg-gray-900">
+                                                    {dept.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 
+                        {/* Desktop Table */}
                         <div className="hidden overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm lg:block dark:border-gray-800 dark:bg-gray-950">
                             <div className="overflow-x-auto">
                                 <table className="w-full caption-bottom text-sm">
@@ -311,6 +355,7 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
                             </div>
                         </div>
 
+                        {/* Mobile View */}
                         <div className="flex flex-col rounded-md border border-gray-200 bg-white shadow-sm lg:hidden dark:border-gray-800 dark:bg-gray-950">
                             <div className="flex overflow-x-auto border-b border-gray-200 p-2 scrollbar-hide dark:border-gray-800">
                                 {generatedDates.map(day => (
@@ -367,7 +412,8 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
                     </>
                 )}
 
-                {currentStep === 3 && (
+                {/* Published Success View */}
+                {currentStep === 2 && (
                     <div className="w-full rounded-lg border border-transparent bg-white p-10 text-center mx-auto dark:bg-gray-950 mt-4">
                         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30 mb-6 shadow-sm">
                             <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-500" />
@@ -376,7 +422,7 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
                             Schedule Published Successfully
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto mb-8">
-                            The roster updates have been finalized and employees can now view their assigned shifts and field tasks.
+                            The roster updates have been finalized. An email containing the complete team schedule has been dispatched.
                         </p>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-gray-100 dark:border-gray-800 pt-8 mt-8 max-w-xl mx-auto">
@@ -393,10 +439,17 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
                                 </p>
                             </div>
                         </div>
+                        
+                        <div className="mt-8 pt-4">
+                            <button onClick={() => setCurrentStep(1)} className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+                                &larr; Return to Planner
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
 
+            {/* Editing Modal */}
             {activeCell && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
                     <div className="w-full max-w-lg rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-950">
@@ -415,13 +468,33 @@ export default function Planner({ teamMembers = [], departments = [], initialAss
                         </div>
 
                         <div className="max-h-[60vh] overflow-y-auto p-6">
+                            
+                            {/* Dynamic Buttons Based on Array Types */}
                             <div className="mb-6 flex space-x-2 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
-                                <button onClick={() => setDraftData({ type: 'off' })} className={`inline-flex h-8 flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 ${draftData.type === 'off' ? 'bg-white text-gray-950 shadow-sm dark:bg-gray-950 dark:text-gray-50' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'}`}>
+                                <button 
+                                    onClick={() => setDraftData({ type: 'off' })} 
+                                    className={`inline-flex h-8 flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 ${draftData.type === 'off' ? 'bg-white text-gray-950 shadow-sm dark:bg-gray-950 dark:text-gray-50' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'}`}
+                                >
                                     Day Off
                                 </button>
-                                <button onClick={() => setDraftData(activeCell.empType === 'office' ? { type: 'office', shifts: [{start: '09:00', end: '17:00'}] } : { type: 'field', tasks: [{time: '10:00', location: '', task: ''}] })} className={`inline-flex h-8 flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 ${draftData.type !== 'off' && draftData.type !== 'unassigned' ? 'bg-white text-gray-950 shadow-sm dark:bg-gray-950 dark:text-gray-50' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'}`}>
-                                    {activeCell.empType === 'office' ? 'Office Shift' : 'Field Task'}
-                                </button>
+                                
+                                {activeCell.empType.includes('office') && (
+                                    <button 
+                                        onClick={() => setDraftData({ type: 'office', shifts: [{start: '09:00', end: '17:00'}] })} 
+                                        className={`inline-flex h-8 flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 ${draftData.type === 'office' ? 'bg-white text-gray-950 shadow-sm dark:bg-gray-950 dark:text-gray-50' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'}`}
+                                    >
+                                        Office Shift
+                                    </button>
+                                )}
+
+                                {activeCell.empType.includes('field') && (
+                                    <button 
+                                        onClick={() => setDraftData({ type: 'field', tasks: [{time: '10:00', location: '', task: ''}] })} 
+                                        className={`inline-flex h-8 flex-1 items-center justify-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 ${draftData.type === 'field' ? 'bg-white text-gray-950 shadow-sm dark:bg-gray-950 dark:text-gray-50' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'}`}
+                                    >
+                                        Field Task
+                                    </button>
+                                )}
                             </div>
 
                             {draftData.type === 'office' && (

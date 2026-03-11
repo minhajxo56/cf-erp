@@ -23,9 +23,6 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         $currentUserRoleName = $this->user()->role->name;
-        
-        // Retrieve the user ID being updated from the route
-        // Assuming your route is defined as /users/{user}
         $userBeingUpdatedId = $this->route('user')->id ?? $this->route('user'); 
 
         $allowedRolesQuery = Role::query();
@@ -39,13 +36,14 @@ class UpdateUserRequest extends FormRequest
         $allowedRoleIds = $allowedRolesQuery->pluck('id')->toArray();
 
         return [
-            'name'          => ['required', 'string', 'max:255'],
-            // Ignore the current user's email address for the unique check
+            'first_name'    => ['required', 'string', 'max:255'],
+            'last_name'     => ['required', 'string', 'max:255'],
             'email'         => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($userBeingUpdatedId)],
-            // Password is optional during an update
-            'password'      => ['nullable', 'string', 'min:8', 'confirmed'],
-            'department_id' => ['nullable', 'exists:departments,id'],
+            'phone'         => ['nullable', 'string', 'max:20'],
+            'department_id' => ['required', 'exists:departments,id'],
             'role_id'       => ['required', Rule::in($allowedRoleIds)],
+            'status'        => ['required', 'in:active,probation,inactive'],
+            'joining_date'  => ['required', 'date'],
         ];
     }
 

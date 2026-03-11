@@ -291,7 +291,11 @@ export default function Form({ user, roles = [], departments = [] }: Props) {
                                 <div className="space-y-2">
                                     <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">System Notification</p>
                                     <p className="font-medium flex justify-center items-center text-green-600 dark:text-green-400">
-                                        <Send className="w-4 h-4 mr-1.5" /> Sent to Email
+                                        {isEdit ? (
+                                            <><CheckCircle2 className="w-4 h-4 mr-1.5" /> Profile Updated</>
+                                        ) : (
+                                            <><Send className="w-4 h-4 mr-1.5" /> Sent to Email</>
+                                        )}
                                     </p>
                                 </div>
                             </div>

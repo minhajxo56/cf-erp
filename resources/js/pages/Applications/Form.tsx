@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import { Send, ArrowLeft, FileText, Palmtree, Wallet, Laptop, Loader2, AlertCircle, FileArchive, CheckCircle2 } from 'lucide-react';
+import { Send, ArrowLeft, FileText, Palmtree, Wallet, Laptop, AlertCircle, FileArchive, CheckCircle2, Paperclip, Save } from 'lucide-react';
 import LeaveFields from './Partials/LeaveFields';
 import ExpenseFields from './Partials/ExpenseFields';
 import { ChevronStepper } from '@/components/ChevronStepper';
@@ -30,7 +30,7 @@ export default function Form({ application }: { application?: any }) {
     const formRef = useRef<HTMLFormElement>(null);
     const [currentStep, setCurrentStep] = useState(1);
 
-    const { data, setData, post, put, processing, errors, transform } = useForm({
+    const { data, setData, post, processing, errors, transform } = useForm({
         type: application?.type || 'leave',
         title: application?.title || '',
         details: application?.details || '',
@@ -39,18 +39,9 @@ export default function Form({ application }: { application?: any }) {
         attachment: null as File | null,
     });
 
-    const handleStepClick = (targetStep: number) => {
-        if (targetStep === currentStep) return;
-
-        if (targetStep === 1) {
-            setCurrentStep(1);
-            return;
-        }
-
+    const handleSubmit = (actionType: 'draft' | 'send') => {
         if (!formRef.current?.reportValidity()) return;
 
-        const actionType = targetStep === 2 ? 'draft' : 'send';
-        
         transform((currentData) => ({
             ...currentData,
             action_type: actionType
@@ -60,14 +51,22 @@ export default function Form({ application }: { application?: any }) {
             forceFormData: true,
             preserveState: true,
             preserveScroll: true,
-            onSuccess: () => setCurrentStep(targetStep),
+            onSuccess: () => setCurrentStep(actionType === 'draft' ? 2 : 3),
         };
 
+        // Even for edits, we use POST because of file uploads in Laravel/Inertia
         if (isEdit) {
             post(`/applications/${application.id}?_method=PUT`, requestOptions);
         } else {
             post('/applications', requestOptions);
         }
+    };
+
+    // Stepper click handler maps to the submit functions
+    const handleStepClick = (targetStep: number) => {
+        if (targetStep === currentStep) return;
+        if (targetStep === 1) { setCurrentStep(1); return; }
+        handleSubmit(targetStep === 2 ? 'draft' : 'send');
     };
 
     return (
@@ -140,11 +139,11 @@ export default function Form({ application }: { application?: any }) {
                                     })}
                                 </div>
 
-                                <div className="flex flex-1 flex-col p-6">
-                                    <div className="flex-1 space-y-6">
+                                <div className="flex flex-1 flex-col">
+                                    <div className="flex-1 space-y-6 p-6">
                                         
                                         {currentStep === 2 && (
-                                            <div className="rounded-md bg-gray-100 p-4 dark:bg-gray-900 mb-6 flex items-center justify-between">
+                                            <div className="rounded-md bg-gray-100 p-4 dark:bg-gray-900 flex items-center justify-between border border-gray-200 dark:border-gray-800">
                                                 <div className="flex items-center text-sm font-medium text-gray-800 dark:text-gray-200">
                                                     <FileArchive className="mr-2 h-4 w-4 text-gray-500" />
                                                     Application saved securely as a draft.
@@ -153,7 +152,7 @@ export default function Form({ application }: { application?: any }) {
                                         )}
 
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium leading-none text-gray-900 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-gray-100">
+                                            <label className="text-sm font-medium leading-none text-gray-900 dark:text-gray-100">
                                                 Subject
                                             </label>
                                             <input 
@@ -161,7 +160,7 @@ export default function Form({ application }: { application?: any }) {
                                                 value={data.title}
                                                 onChange={e => setData('title', e.target.value)}
                                                 placeholder="e.g., Annual Leave for December"
-                                                className="flex h-9 w-full rounded-md border border-gray-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-800 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300" 
+                                                className="flex h-9 w-full rounded-md border border-gray-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300" 
                                                 required 
                                             />
                                             {errors.title && <p className="text-[0.8rem] font-medium text-red-500 dark:text-red-900">{errors.title}</p>}
@@ -173,7 +172,7 @@ export default function Form({ application }: { application?: any }) {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium leading-none text-gray-900 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-gray-100">
+                                            <label className="text-sm font-medium leading-none text-gray-900 dark:text-gray-100">
                                                 Details
                                             </label>
                                             <textarea 
@@ -181,11 +180,50 @@ export default function Form({ application }: { application?: any }) {
                                                 value={data.details}
                                                 onChange={e => setData('details', e.target.value)}
                                                 placeholder="Provide necessary context, links, or justification..."
-                                                className="flex min-h-[100px] w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-800 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300" 
+                                                className="flex min-h-[100px] w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300" 
                                                 required 
                                             />
                                             {errors.details && <p className="text-[0.8rem] font-medium text-red-500 dark:text-red-900">{errors.details}</p>}
                                         </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium leading-none text-gray-900 dark:text-gray-100">
+                                                Attachment (Optional)
+                                            </label>
+                                            {application?.attachment_path && (
+                                                <div className="mb-2 text-sm text-gray-500 flex items-center">
+                                                    <Paperclip className="h-4 w-4 mr-1" />
+                                                    Current file: <a href={`/storage/${application.attachment_path}`} target="_blank" rel="noreferrer" className="ml-1 text-blue-600 hover:underline">View Attached</a>
+                                                </div>
+                                            )}
+                                            <input 
+                                                type="file" 
+                                                onChange={e => setData('attachment', e.target.files ? e.target.files[0] : null)}
+                                                className="flex w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm shadow-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 dark:border-gray-800 dark:file:text-gray-50 dark:placeholder:text-gray-400 dark:focus-visible:ring-gray-300"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                            />
+                                            {errors.attachment && <p className="text-[0.8rem] font-medium text-red-500 dark:text-red-900">{errors.attachment as string}</p>}
+                                        </div>
+                                    </div>
+
+                                    {/* Explicit Action Buttons at the bottom of the form */}
+                                    <div className="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 p-6 dark:border-gray-800 dark:bg-gray-900/50">
+                                        <button 
+                                            type="button"
+                                            onClick={() => handleSubmit('draft')}
+                                            disabled={processing}
+                                            className="inline-flex h-9 items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-gray-100 disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50 dark:hover:bg-gray-800"
+                                        >
+                                            <Save className="mr-2 h-4 w-4" /> Save Draft
+                                        </button>
+                                        <button 
+                                            type="button"
+                                            onClick={() => handleSubmit('send')}
+                                            disabled={processing}
+                                            className="inline-flex h-9 items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90"
+                                        >
+                                            <Send className="mr-2 h-4 w-4" /> Submit Request
+                                        </button>
                                     </div>
                                 </div>
                             </>
@@ -212,7 +250,7 @@ export default function Form({ application }: { application?: any }) {
                                     </div>
                                     <div className="space-y-2">
                                         <p className="text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Subject</p>
-                                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px] mx-auto">
+                                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px] mx-auto" title={data.title}>
                                             {data.title}
                                         </p>
                                     </div>

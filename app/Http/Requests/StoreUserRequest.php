@@ -32,7 +32,7 @@ class StoreUserRequest extends FormRequest
         return [
             'first_name'    => ['required', 'string', 'max:255'],
             'last_name'     => ['required', 'string', 'max:255'],
-            'email'         => 'required|email|unique:users,email,' . $this->route('user')->id,
+            'email'         => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'phone'         => ['nullable', 'string', 'max:20'],
             'department_id' => ['required', 'exists:departments,id'],
             'role_id'       => ['required', Rule::in($allowedRoleIds)],

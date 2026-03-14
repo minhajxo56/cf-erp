@@ -222,7 +222,7 @@ store.form = storeForm
 * @see app/Http/Controllers/TourController.php:71
 * @route '/tours/{tour}'
 */
-export const show = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -237,7 +237,7 @@ show.definition = {
 * @see app/Http/Controllers/TourController.php:71
 * @route '/tours/{tour}'
 */
-show.url = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+show.url = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { tour: args }
     }
@@ -270,7 +270,7 @@ show.url = (args: { tour: string | number | { id: string | number } } | [tour: s
 * @see app/Http/Controllers/TourController.php:71
 * @route '/tours/{tour}'
 */
-show.get = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -280,7 +280,7 @@ show.get = (args: { tour: string | number | { id: string | number } } | [tour: s
 * @see app/Http/Controllers/TourController.php:71
 * @route '/tours/{tour}'
 */
-show.head = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -290,7 +290,7 @@ show.head = (args: { tour: string | number | { id: string | number } } | [tour: 
 * @see app/Http/Controllers/TourController.php:71
 * @route '/tours/{tour}'
 */
-const showForm = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const showForm = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -300,7 +300,7 @@ const showForm = (args: { tour: string | number | { id: string | number } } | [t
 * @see app/Http/Controllers/TourController.php:71
 * @route '/tours/{tour}'
 */
-showForm.get = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.get = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -310,7 +310,7 @@ showForm.get = (args: { tour: string | number | { id: string | number } } | [tou
 * @see app/Http/Controllers/TourController.php:71
 * @route '/tours/{tour}'
 */
-showForm.head = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.head = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -327,7 +327,7 @@ show.form = showForm
 * @see app/Http/Controllers/TourController.php:78
 * @route '/tours/{tour}/edit'
 */
-export const edit = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const edit = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 })
@@ -342,7 +342,7 @@ edit.definition = {
 * @see app/Http/Controllers/TourController.php:78
 * @route '/tours/{tour}/edit'
 */
-edit.url = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+edit.url = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { tour: args }
     }
@@ -375,7 +375,7 @@ edit.url = (args: { tour: string | number | { id: string | number } } | [tour: s
 * @see app/Http/Controllers/TourController.php:78
 * @route '/tours/{tour}/edit'
 */
-edit.get = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+edit.get = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 })
@@ -385,7 +385,7 @@ edit.get = (args: { tour: string | number | { id: string | number } } | [tour: s
 * @see app/Http/Controllers/TourController.php:78
 * @route '/tours/{tour}/edit'
 */
-edit.head = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+edit.head = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(args, options),
     method: 'head',
 })
@@ -395,7 +395,7 @@ edit.head = (args: { tour: string | number | { id: string | number } } | [tour: 
 * @see app/Http/Controllers/TourController.php:78
 * @route '/tours/{tour}/edit'
 */
-const editForm = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const editForm = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, options),
     method: 'get',
 })
@@ -405,7 +405,7 @@ const editForm = (args: { tour: string | number | { id: string | number } } | [t
 * @see app/Http/Controllers/TourController.php:78
 * @route '/tours/{tour}/edit'
 */
-editForm.get = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+editForm.get = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, options),
     method: 'get',
 })
@@ -415,7 +415,7 @@ editForm.get = (args: { tour: string | number | { id: string | number } } | [tou
 * @see app/Http/Controllers/TourController.php:78
 * @route '/tours/{tour}/edit'
 */
-editForm.head = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+editForm.head = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -432,7 +432,7 @@ edit.form = editForm
 * @see app/Http/Controllers/TourController.php:89
 * @route '/tours/{tour}'
 */
-export const update = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -447,7 +447,7 @@ update.definition = {
 * @see app/Http/Controllers/TourController.php:89
 * @route '/tours/{tour}'
 */
-update.url = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+update.url = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { tour: args }
     }
@@ -480,7 +480,7 @@ update.url = (args: { tour: string | number | { id: string | number } } | [tour:
 * @see app/Http/Controllers/TourController.php:89
 * @route '/tours/{tour}'
 */
-update.put = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -490,7 +490,7 @@ update.put = (args: { tour: string | number | { id: string | number } } | [tour:
 * @see app/Http/Controllers/TourController.php:89
 * @route '/tours/{tour}'
 */
-update.patch = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+update.patch = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 })
@@ -500,7 +500,7 @@ update.patch = (args: { tour: string | number | { id: string | number } } | [tou
 * @see app/Http/Controllers/TourController.php:89
 * @route '/tours/{tour}'
 */
-const updateForm = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updateForm = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -515,7 +515,7 @@ const updateForm = (args: { tour: string | number | { id: string | number } } | 
 * @see app/Http/Controllers/TourController.php:89
 * @route '/tours/{tour}'
 */
-updateForm.put = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateForm.put = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -530,7 +530,7 @@ updateForm.put = (args: { tour: string | number | { id: string | number } } | [t
 * @see app/Http/Controllers/TourController.php:89
 * @route '/tours/{tour}'
 */
-updateForm.patch = (args: { tour: string | number | { id: string | number } } | [tour: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateForm.patch = (args: { tour: number | { id: number } } | [tour: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PATCH',

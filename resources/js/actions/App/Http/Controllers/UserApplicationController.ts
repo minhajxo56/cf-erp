@@ -303,7 +303,7 @@ store.form = storeForm
 * @see app/Http/Controllers/UserApplicationController.php:189
 * @route '/applications/{application}'
 */
-export const show = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -318,7 +318,7 @@ show.definition = {
 * @see app/Http/Controllers/UserApplicationController.php:189
 * @route '/applications/{application}'
 */
-show.url = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+show.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { application: args }
     }
@@ -351,7 +351,7 @@ show.url = (args: { application: string | number | { id: string | number } } | [
 * @see app/Http/Controllers/UserApplicationController.php:189
 * @route '/applications/{application}'
 */
-show.get = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -361,7 +361,7 @@ show.get = (args: { application: string | number | { id: string | number } } | [
 * @see app/Http/Controllers/UserApplicationController.php:189
 * @route '/applications/{application}'
 */
-show.head = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -371,7 +371,7 @@ show.head = (args: { application: string | number | { id: string | number } } | 
 * @see app/Http/Controllers/UserApplicationController.php:189
 * @route '/applications/{application}'
 */
-const showForm = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const showForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -381,7 +381,7 @@ const showForm = (args: { application: string | number | { id: string | number }
 * @see app/Http/Controllers/UserApplicationController.php:189
 * @route '/applications/{application}'
 */
-showForm.get = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.get = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -391,7 +391,7 @@ showForm.get = (args: { application: string | number | { id: string | number } }
 * @see app/Http/Controllers/UserApplicationController.php:189
 * @route '/applications/{application}'
 */
-showForm.head = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.head = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -616,7 +616,7 @@ update.form = updateForm
 * @see app/Http/Controllers/UserApplicationController.php:252
 * @route '/applications/{application}'
 */
-export const destroy = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -631,7 +631,7 @@ destroy.definition = {
 * @see app/Http/Controllers/UserApplicationController.php:252
 * @route '/applications/{application}'
 */
-destroy.url = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+destroy.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { application: args }
     }
@@ -664,7 +664,7 @@ destroy.url = (args: { application: string | number | { id: string | number } } 
 * @see app/Http/Controllers/UserApplicationController.php:252
 * @route '/applications/{application}'
 */
-destroy.delete = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -674,7 +674,7 @@ destroy.delete = (args: { application: string | number | { id: string | number }
 * @see app/Http/Controllers/UserApplicationController.php:252
 * @route '/applications/{application}'
 */
-const destroyForm = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const destroyForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: destroy.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'DELETE',
@@ -689,7 +689,7 @@ const destroyForm = (args: { application: string | number | { id: string | numbe
 * @see app/Http/Controllers/UserApplicationController.php:252
 * @route '/applications/{application}'
 */
-destroyForm.delete = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+destroyForm.delete = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: destroy.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'DELETE',
@@ -706,7 +706,7 @@ destroy.form = destroyForm
 * @see app/Http/Controllers/UserApplicationController.php:222
 * @route '/applications/{application}/escalate'
 */
-export const escalate = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const escalate = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: escalate.url(args, options),
     method: 'post',
 })
@@ -721,7 +721,7 @@ escalate.definition = {
 * @see app/Http/Controllers/UserApplicationController.php:222
 * @route '/applications/{application}/escalate'
 */
-escalate.url = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+escalate.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { application: args }
     }
@@ -754,7 +754,7 @@ escalate.url = (args: { application: string | number | { id: string | number } }
 * @see app/Http/Controllers/UserApplicationController.php:222
 * @route '/applications/{application}/escalate'
 */
-escalate.post = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+escalate.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: escalate.url(args, options),
     method: 'post',
 })
@@ -764,7 +764,7 @@ escalate.post = (args: { application: string | number | { id: string | number } 
 * @see app/Http/Controllers/UserApplicationController.php:222
 * @route '/applications/{application}/escalate'
 */
-const escalateForm = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const escalateForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: escalate.url(args, options),
     method: 'post',
 })
@@ -774,7 +774,7 @@ const escalateForm = (args: { application: string | number | { id: string | numb
 * @see app/Http/Controllers/UserApplicationController.php:222
 * @route '/applications/{application}/escalate'
 */
-escalateForm.post = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+escalateForm.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: escalate.url(args, options),
     method: 'post',
 })
@@ -786,7 +786,7 @@ escalate.form = escalateForm
 * @see app/Http/Controllers/UserApplicationController.php:200
 * @route '/applications/{application}/resolve'
 */
-export const resolve = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const resolve = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: resolve.url(args, options),
     method: 'post',
 })
@@ -801,7 +801,7 @@ resolve.definition = {
 * @see app/Http/Controllers/UserApplicationController.php:200
 * @route '/applications/{application}/resolve'
 */
-resolve.url = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+resolve.url = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { application: args }
     }
@@ -834,7 +834,7 @@ resolve.url = (args: { application: string | number | { id: string | number } } 
 * @see app/Http/Controllers/UserApplicationController.php:200
 * @route '/applications/{application}/resolve'
 */
-resolve.post = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+resolve.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: resolve.url(args, options),
     method: 'post',
 })
@@ -844,7 +844,7 @@ resolve.post = (args: { application: string | number | { id: string | number } }
 * @see app/Http/Controllers/UserApplicationController.php:200
 * @route '/applications/{application}/resolve'
 */
-const resolveForm = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const resolveForm = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: resolve.url(args, options),
     method: 'post',
 })
@@ -854,7 +854,7 @@ const resolveForm = (args: { application: string | number | { id: string | numbe
 * @see app/Http/Controllers/UserApplicationController.php:200
 * @route '/applications/{application}/resolve'
 */
-resolveForm.post = (args: { application: string | number | { id: string | number } } | [application: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+resolveForm.post = (args: { application: number | { id: number } } | [application: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: resolve.url(args, options),
     method: 'post',
 })

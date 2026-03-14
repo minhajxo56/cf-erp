@@ -170,7 +170,7 @@ export const create = {
 * @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
-export const acknowledge = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const acknowledge = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: acknowledge.url(args, options),
     method: 'post',
 })
@@ -185,7 +185,7 @@ acknowledge.definition = {
 * @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
-acknowledge.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+acknowledge.url = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { letter: args }
     }
@@ -218,7 +218,7 @@ acknowledge.url = (args: { letter: string | number | { id: string | number } } |
 * @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
-acknowledge.post = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+acknowledge.post = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: acknowledge.url(args, options),
     method: 'post',
 })
@@ -228,7 +228,7 @@ acknowledge.post = (args: { letter: string | number | { id: string | number } } 
 * @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
-const acknowledgeForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const acknowledgeForm = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: acknowledge.url(args, options),
     method: 'post',
 })
@@ -238,7 +238,7 @@ const acknowledgeForm = (args: { letter: string | number | { id: string | number
 * @see app/Http/Controllers/LetterController.php:185
 * @route '/letters/{letter}/acknowledge'
 */
-acknowledgeForm.post = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+acknowledgeForm.post = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: acknowledge.url(args, options),
     method: 'post',
 })
@@ -387,7 +387,7 @@ store.form = storeForm
 * @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
-export const show = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -402,7 +402,7 @@ show.definition = {
 * @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
-show.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+show.url = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { letter: args }
     }
@@ -435,7 +435,7 @@ show.url = (args: { letter: string | number | { id: string | number } } | [lette
 * @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
-show.get = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -445,7 +445,7 @@ show.get = (args: { letter: string | number | { id: string | number } } | [lette
 * @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
-show.head = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -455,7 +455,7 @@ show.head = (args: { letter: string | number | { id: string | number } } | [lett
 * @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
-const showForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const showForm = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -465,7 +465,7 @@ const showForm = (args: { letter: string | number | { id: string | number } } | 
 * @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
-showForm.get = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.get = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -475,7 +475,7 @@ showForm.get = (args: { letter: string | number | { id: string | number } } | [l
 * @see app/Http/Controllers/LetterController.php:175
 * @route '/letters/{letter}'
 */
-showForm.head = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.head = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -492,7 +492,7 @@ show.form = showForm
 * @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
-export const edit = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const edit = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 })
@@ -507,7 +507,7 @@ edit.definition = {
 * @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
-edit.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+edit.url = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { letter: args }
     }
@@ -540,7 +540,7 @@ edit.url = (args: { letter: string | number | { id: string | number } } | [lette
 * @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
-edit.get = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+edit.get = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 })
@@ -550,7 +550,7 @@ edit.get = (args: { letter: string | number | { id: string | number } } | [lette
 * @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
-edit.head = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+edit.head = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(args, options),
     method: 'head',
 })
@@ -560,7 +560,7 @@ edit.head = (args: { letter: string | number | { id: string | number } } | [lett
 * @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
-const editForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const editForm = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, options),
     method: 'get',
 })
@@ -570,7 +570,7 @@ const editForm = (args: { letter: string | number | { id: string | number } } | 
 * @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
-editForm.get = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+editForm.get = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, options),
     method: 'get',
 })
@@ -580,7 +580,7 @@ editForm.get = (args: { letter: string | number | { id: string | number } } | [l
 * @see app/Http/Controllers/LetterController.php:115
 * @route '/letters/{letter}/edit'
 */
-editForm.head = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+editForm.head = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: edit.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',
@@ -597,7 +597,7 @@ edit.form = editForm
 * @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
-export const update = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -612,7 +612,7 @@ update.definition = {
 * @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
-update.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+update.url = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { letter: args }
     }
@@ -645,7 +645,7 @@ update.url = (args: { letter: string | number | { id: string | number } } | [let
 * @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
-update.put = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -655,7 +655,7 @@ update.put = (args: { letter: string | number | { id: string | number } } | [let
 * @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
-update.patch = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+update.patch = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 })
@@ -665,7 +665,7 @@ update.patch = (args: { letter: string | number | { id: string | number } } | [l
 * @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
-const updateForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const updateForm = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -680,7 +680,7 @@ const updateForm = (args: { letter: string | number | { id: string | number } } 
 * @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
-updateForm.put = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateForm.put = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PUT',
@@ -695,7 +695,7 @@ updateForm.put = (args: { letter: string | number | { id: string | number } } | 
 * @see app/Http/Controllers/LetterController.php:127
 * @route '/letters/{letter}'
 */
-updateForm.patch = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+updateForm.patch = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: update.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PATCH',
@@ -796,7 +796,7 @@ destroy.form = destroyForm
 * @see app/Http/Controllers/LetterController.php:198
 * @route '/letters/{letter}/cancel'
 */
-export const cancel = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+export const cancel = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: cancel.url(args, options),
     method: 'patch',
 })
@@ -811,7 +811,7 @@ cancel.definition = {
 * @see app/Http/Controllers/LetterController.php:198
 * @route '/letters/{letter}/cancel'
 */
-cancel.url = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+cancel.url = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { letter: args }
     }
@@ -844,7 +844,7 @@ cancel.url = (args: { letter: string | number | { id: string | number } } | [let
 * @see app/Http/Controllers/LetterController.php:198
 * @route '/letters/{letter}/cancel'
 */
-cancel.patch = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+cancel.patch = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: cancel.url(args, options),
     method: 'patch',
 })
@@ -854,7 +854,7 @@ cancel.patch = (args: { letter: string | number | { id: string | number } } | [l
 * @see app/Http/Controllers/LetterController.php:198
 * @route '/letters/{letter}/cancel'
 */
-const cancelForm = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+const cancelForm = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: cancel.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PATCH',
@@ -869,7 +869,7 @@ const cancelForm = (args: { letter: string | number | { id: string | number } } 
 * @see app/Http/Controllers/LetterController.php:198
 * @route '/letters/{letter}/cancel'
 */
-cancelForm.patch = (args: { letter: string | number | { id: string | number } } | [letter: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+cancelForm.patch = (args: { letter: number | { id: number } } | [letter: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
     action: cancel.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'PATCH',

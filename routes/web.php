@@ -12,6 +12,7 @@ use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\LetterController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\DesignController;
 
 use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Controllers\Auth\ForcePasswordChangeController;
@@ -79,9 +80,12 @@ Route::middleware(['auth'])->group(function () {
 
         Route::resource('departments', DepartmentController::class)->except(['show']);
     
-    // Assign managers to a department
-    Route::get('departments/{department}/assign-managers', [DepartmentController::class, 'assignManagers'])->name('departments.assign-managers');
-    Route::post('departments/{department}/managers', [DepartmentController::class, 'syncManagers'])->name('departments.sync-managers');
+        // Assign managers to a department
+        Route::get('departments/{department}/assign-managers', [DepartmentController::class, 'assignManagers'])->name('departments.assign-managers');
+        Route::post('departments/{department}/managers', [DepartmentController::class, 'syncManagers'])->name('departments.sync-managers');
+
+        Route::get('/designs', [DesignController::class, 'index'])->name('designs.index');
+        Route::get('/designs/modules/{module}', [DesignController::class, 'showModule'])->name('designs.module');
 
     });
 });

@@ -1,0 +1,204 @@
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Head } from '@inertiajs/react';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
+import { Canvas, FabricImage, Textbox, Circle, Group, Path } from 'fabric';
+import EditorToolbar from '../Components/EditorToolbar';
+import CanvasWorkspace from '../Components/CanvasWorkspace';
+import TemplateSelectorModal from '../Components/TemplateSelectorModal';
+import TextPropertiesPanel from '../Components/TextPropertiesPanel';
+import PortraitCropperModal from '../Components/PortraitCropperModal';
+
+const TEMPLATES = ['/templates/Quote-1.png', '/templates/Quote-2.png', '/templates/Quote-3.png', '/templates/Quote-4.png', '/templates/Quote-5.png', '/templates/Quote-6.png', '/templates/Quote-7.png'];
+const CROP_SIZE = 800;
+const CANVAS_WIDTH = 1600;
+const CANVAS_HEIGHT = 2000;
+
+export default function QuoteEditor() {
+    const breadcrumbs: BreadcrumbItem[] = [{ title: 'Designs', href: '/designs' }, { title: 'Quote Editor', href: '#' }];
+    const containerRef = useRef<HTMLDivElement>(null);
+    const canvasElRef = useRef<HTMLCanvasElement>(null);
+    const cropCanvasElRef = useRef<HTMLCanvasElement>(null);
+    const canvasRef = useRef<Canvas | null>(null);
+    const cropCanvasRef = useRef<Canvas | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const portraitInputRef = useRef<HTMLInputElement>(null);
+    const [activeTemplate, setActiveTemplate] = useState(TEMPLATES[0]);
+    const [showTemplates, setShowTemplates] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSharing, setIsSharing] = useState(false);
+    const [cropImageObj, setCropImageObj] = useState<FabricImage | null>(null);
+    const [showCropper, setShowCropper] = useState(false);
+    const [cropZoom, setCropZoom] = useState(1);
+    const [displayScale, setDisplayScale] = useState(1);
+    const [activeTextObj, setActiveTextObj] = useState<Textbox | null>(null);
+    const [textInput, setTextInput] = useState('');
+    const [fontSize, setFontSize] = useState(120);
+    const [textColor, setTextColor] = useState('#ef4444');
+
+    const loadTemplateToCanvas = async (canvas: Canvas, url: string) => {
+        try {
+            const img = await FabricImage.fromURL(url, { crossOrigin: 'anonymous' });
+            const scaleX = CANVAS_WIDTH / img.width;
+            const scaleY = CANVAS_HEIGHT / img.height;
+            const scale = Math.max(scaleX, scaleY);
+            img.set({ originX: 'center', originY: 'center', left: CANVAS_WIDTH / 2, top: CANVAS_HEIGHT / 2, scaleX: scale, scaleY: scale, selectable: false, evented: false });
+            (img as any).name = 'template';
+            canvas.add(img);
+            canvas.moveObjectTo(img, 0);
+            canvas.renderAll();
+        } catch (e) {}
+    };
+
+    const setupTextEditor = (obj: Textbox) => {
+        setActiveTextObj(obj);
+        setTextInput(obj.text || '');
+        setFontSize(obj.fontSize || 120);
+        setTextColor(obj.fill as string || '#000000');
+    };
+
+    const closeTextEditor = () => setActiveTextObj(null);
+
+    const initEditor = useCallback(async () => {
+        if (!canvasElRef.current || !containerRef.current) return;
+        setDisplayScale(containerRef.current.clientWidth / CANVAS_WIDTH);
+        if (!canvasRef.current) {
+            canvasRef.current = new Canvas(canvasElRef.current, { width: CANVAS_WIDTH, height: CANVAS_HEIGHT, preserveObjectStacking: true });
+            canvasRef.current.on('selection:created', (e) => { if (e.selected?.[0] instanceof Textbox) setupTextEditor(e.selected[0] as Textbox); });
+            canvasRef.current.on('selection:updated', (e) => { if (e.selected?.[0] instanceof Textbox) setupTextEditor(e.selected[0] as Textbox); else closeTextEditor(); });
+            canvasRef.current.on('selection:cleared', closeTextEditor);
+        }
+        canvasRef.current.clear();
+        await loadTemplateToCanvas(canvasRef.current, activeTemplate);
+        setIsLoading(false);
+    }, [activeTemplate]);
+
+    useEffect(() => {
+        initEditor();
+        const handleResize = () => { if (containerRef.current) setDisplayScale(containerRef.current.clientWidth / CANVAS_WIDTH); };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [initEditor]);
+
+    const handleTemplateChange = async (url: string) => {
+        if (window.confirm("Changing the template will reset your current design. Are you sure?")) {
+            setIsLoading(true);
+            setActiveTemplate(url);
+            setShowTemplates(false);
+        }
+    };
+
+    const handleBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !canvasRef.current) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            if (ev.target?.result) {
+                const img = await FabricImage.fromURL(ev.target.result as string);
+                const scaleX = CANVAS_WIDTH / img.width;
+                const scaleY = CANVAS_HEIGHT / img.height;
+                const scale = Math.max(scaleX, scaleY);
+                img.set({ originX: 'center', originY: 'center', left: CANVAS_WIDTH / 2, top: CANVAS_HEIGHT / 2, scaleX: scale, scaleY: scale });
+                canvasRef.current!.add(img);
+                canvasRef.current!.moveObjectTo(img, 0);
+                canvasRef.current!.renderAll();
+            }
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    };
+
+    const openCropper = async (dataUrl: string) => {
+        setShowCropper(true);
+        setCropZoom(1);
+        setTimeout(async () => {
+            if (!cropCanvasElRef.current) return;
+            if (!cropCanvasRef.current) cropCanvasRef.current = new Canvas(cropCanvasElRef.current, { width: window.innerWidth, height: window.innerHeight * 0.7, selection: false, backgroundColor: '#000', preserveObjectStacking: true });
+            const cropCanvas = cropCanvasRef.current;
+            cropCanvas.clear();
+            const img = await FabricImage.fromURL(dataUrl);
+            setCropImageObj(img);
+            const minScale = CROP_SIZE / Math.min(img.width, img.height);
+            img.set({ scaleX: minScale, scaleY: minScale, left: cropCanvas.width / 2, top: cropCanvas.height / 2, originX: 'center', originY: 'center', hasControls: false, hasBorders: false, hoverCursor: 'grab', moveCursor: 'grabbing' });
+            cropCanvas.add(img);
+            cropCanvas.moveObjectTo(img, 0);
+            const cx = cropCanvas.width / 2;
+            const cy = cropCanvas.height / 2;
+            const maskPath = new Path(`M 0 0 H ${cropCanvas.width} V ${cropCanvas.height} H 0 Z M ${cx} ${cy - CROP_SIZE/2} A ${CROP_SIZE/2} ${CROP_SIZE/2} 0 1 0 ${cx} ${cy + CROP_SIZE/2} A ${CROP_SIZE/2} ${CROP_SIZE/2} 0 1 0 ${cx} ${cy - CROP_SIZE/2} Z`, { fill: 'rgba(0,0,0,0.7)', selectable: false, evented: false, fillRule: 'evenodd' });
+            const guideCircle = new Circle({ left: cx, top: cy, radius: CROP_SIZE / 2, originX: 'center', originY: 'center', fill: 'transparent', stroke: '#2563eb', strokeWidth: 5, selectable: false, evented: false });
+            cropCanvas.add(maskPath, guideCircle);
+            cropCanvas.setActiveObject(img);
+            cropCanvas.renderAll();
+        }, 100);
+    };
+
+    const handlePortraitUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => { if (ev.target?.result) openCropper(ev.target.result as string); };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    };
+
+    const handleZoom = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const zoom = parseFloat(e.target.value);
+        setCropZoom(zoom);
+        if (cropImageObj && cropCanvasRef.current) {
+            const baseScale = CROP_SIZE / Math.min(cropImageObj.width, cropImageObj.height);
+            cropImageObj.set({ scaleX: baseScale * zoom, scaleY: baseScale * zoom });
+            cropCanvasRef.current.renderAll();
+        }
+    };
+
+    const applyCrop = async () => {
+        if (!cropCanvasRef.current || !cropImageObj || !canvasRef.current) return;
+        const cropCanvas = cropCanvasRef.current;
+        const cx = cropCanvas.width / 2;
+        const cy = cropCanvas.height / 2;
+        cropCanvas.getObjects().forEach(obj => { if (obj !== cropImageObj) obj.visible = false; });
+        const croppedData = cropCanvas.toDataURL({ left: cx - CROP_SIZE / 2, top: cy - CROP_SIZE / 2, width: CROP_SIZE, height: CROP_SIZE, multiplier: 2 });
+        const img = await FabricImage.fromURL(croppedData);
+        const radius = img.width / 2;
+        img.set({ clipPath: new Circle({ radius, originX: 'center', originY: 'center' }), originX: 'center', originY: 'center' });
+        const border = new Circle({ radius, fill: 'transparent', stroke: '#fff', strokeWidth: 30, originX: 'center', originY: 'center' });
+        const group = new Group([img, border], { left: CANVAS_WIDTH / 2, top: CANVAS_HEIGHT / 2, originX: 'center', originY: 'center', cornerColor: '#2563eb', cornerSize: 60, transparentCorners: false });
+        group.scaleToWidth(CANVAS_WIDTH * 0.4);
+        canvasRef.current.add(group);
+        canvasRef.current.bringObjectToFront(group);
+        canvasRef.current.setActiveObject(group);
+        canvasRef.current.renderAll();
+        setShowCropper(false);
+    };
+
+    const addTextObject = (defaultText: string, fill: string, topOffset: number, size: number) => {
+        if (!canvasRef.current) return;
+        const text = new Textbox(defaultText, { left: CANVAS_WIDTH / 2, top: (CANVAS_HEIGHT / 2) + topOffset, width: CANVAS_WIDTH * 0.8, fill, fontSize: size, originX: 'center', originY: 'center', textAlign: 'center', fontWeight: 'bold', cornerColor: '#2563eb', cornerSize: 60, transparentCorners: false, splitByGrapheme: true });
+        text.setControlsVisibility({ mt: false, mb: false, ml: false, mr: false });
+        canvasRef.current.add(text);
+        canvasRef.current.setActiveObject(text);
+    };
+
+    const updateText = (val: string) => { setTextInput(val); if (activeTextObj && canvasRef.current) { activeTextObj.set({ text: val }); canvasRef.current.requestRenderAll(); } };
+    const updateFontSize = (e: React.ChangeEvent<HTMLInputElement>) => { const val = parseInt(e.target.value); setFontSize(val); if (activeTextObj && canvasRef.current) { activeTextObj.set({ fontSize: val }); canvasRef.current.requestRenderAll(); } };
+    const updateColor = (color: string) => { setTextColor(color); if (activeTextObj && canvasRef.current) { activeTextObj.set({ fill: color }); canvasRef.current.requestRenderAll(); } };
+    const centerText = () => { if (activeTextObj && canvasRef.current) { activeTextObj.set({ left: CANVAS_WIDTH / 2, originX: 'center' }); canvasRef.current.renderAll(); } };
+    const downloadImage = () => { if (!canvasRef.current) return; canvasRef.current.discardActiveObject(); canvasRef.current.renderAll(); const link = document.createElement('a'); link.download = 'quote-design.png'; link.href = canvasRef.current.toDataURL({ format: 'png', multiplier: 1 }); link.click(); };
+    const copyImage = async () => { if (!canvasRef.current) return; canvasRef.current.discardActiveObject(); canvasRef.current.renderAll(); try { const blob = await (await fetch(canvasRef.current.toDataURL({ format: 'png', multiplier: 1 }))).blob(); await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); alert('Copied to clipboard!'); } catch (e) { alert('Copy failed.'); } };
+    const shareImage = async () => { if (!canvasRef.current) return; setIsSharing(true); canvasRef.current.discardActiveObject(); canvasRef.current.renderAll(); try { const blob = await (await fetch(canvasRef.current.toDataURL({ format: 'png', multiplier: 1 }))).blob(); const file = new File([blob], 'design.png', { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Design', text: ' ' }); } else { alert('Sharing not supported.'); } } catch (e) {} setIsSharing(false); };
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Quote Editor - App Name" />
+            <div className="mx-auto w-full max-w-3xl flex-1 p-2 md:p-8 flex flex-col items-center dark:bg-gray-900 min-h-screen">
+                {isLoading && <div className="fixed inset-0 z-50 flex items-center justify-center dark:bg-gray-950/90 dark:text-white font-bold">Initializing...</div>}
+                {isSharing && <div className="fixed inset-0 z-50 flex items-center justify-center dark:bg-gray-950/90 dark:text-white font-bold">Preparing...</div>}
+                <EditorToolbar onTheme={() => setShowTemplates(true)} onBg={() => fileInputRef.current?.click()} onImg={() => portraitInputRef.current?.click()} onQuote={() => addTextObject('Enter Quote', '#e11d48', -200, 120)} onName={() => addTextObject('— Name', '#ffffff', 300, 80)} onCopy={copyImage} onSave={downloadImage} onPost={shareImage} bgRef={fileInputRef} imgRef={portraitInputRef} onBgUpload={handleBgUpload} onImgUpload={handlePortraitUpload} />
+                <CanvasWorkspace containerRef={containerRef} canvasElRef={canvasElRef} displayScale={displayScale} canvasWidth={CANVAS_WIDTH} canvasHeight={CANVAS_HEIGHT} />
+                {showTemplates && <TemplateSelectorModal templates={TEMPLATES} activeTemplate={activeTemplate} onSelect={handleTemplateChange} onClose={() => setShowTemplates(false)} />}
+                {activeTextObj && <TextPropertiesPanel textColor={textColor} fontSize={fontSize} textInput={textInput} onColor={updateColor} onSize={updateFontSize} onText={updateText} onCenter={centerText} onClose={closeTextEditor} />}
+                {showCropper && <PortraitCropperModal canvasRef={cropCanvasElRef} zoom={cropZoom} onZoom={handleZoom} onApply={applyCrop} onCancel={() => setShowCropper(false)} />}
+            </div>
+        </AppLayout>
+    );
+}

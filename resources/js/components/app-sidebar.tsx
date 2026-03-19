@@ -8,7 +8,7 @@ import {
     Users, 
     Plane, 
     FileText, 
-    Settings, 
+    Quote, 
     Mail,
     Building2 // <-- Added icon for Departments
 } from 'lucide-react';
@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes'; 
 
-// Role hierarchy constants (Added super_admin to align with backend policies)
+// Role hierarchy constants
 const ROLES = {
     ALL: ['super_admin', 'admin', 'ceo', 'hr', 'team_in_charge', 'employee', 'intern'],
     EMPLOYEE_UP: ['super_admin', 'admin', 'ceo', 'hr', 'team_in_charge', 'employee'],
@@ -39,7 +39,9 @@ const ROLES = {
 };
 
 export function AppSidebar() {
-    const { auth } = usePage<any>().props;
+    // Destructure `url` to check the active route, and `props` for auth
+    const { url, props } = usePage<any>();
+    const { auth } = props;
     
     // Safely extract and normalize the role exactly like the backend
     const rawRole = auth?.user?.role?.name || 'intern';
@@ -48,6 +50,12 @@ export function AppSidebar() {
     // Filter navigation items based on normalized role
     const filteredNavGroups = useMemo(() => {
         const groups = [
+            {
+                title: 'Designs',
+                items: [
+                    { title: 'Quotes Card', href: '/designs/modules/quote-card', icon: Quote, allowed: ROLES.ALL },
+                ]
+            },
             {
                 title: 'Workspace',
                 items: [
@@ -68,7 +76,7 @@ export function AppSidebar() {
                 title: 'Administration',
                 items: [
                     { title: 'Employees Directory', href: '/users', icon: Users, allowed: ROLES.HR_UP },
-                    { title: 'Departments', href: '/departments', icon: Building2, allowed: ROLES.HR_UP }, // <-- Added Departments route
+                    { title: 'Departments', href: '/departments', icon: Building2, allowed: ROLES.HR_UP }, 
                     { title: 'Official Letters', href: '/letters', icon: Mail, allowed: ROLES.EMPLOYEE_UP },
                     { title: 'Activity Logs', href: '/activity-logs', icon: FolderGit2, allowed: ROLES.ADMIN_ONLY },
                 ]
@@ -110,9 +118,15 @@ export function AppSidebar() {
                             <SidebarMenu>
                                 {group.items.map((item) => {
                                     const Icon = item.icon;
+                                    
+                                    // Determine if the current URL matches the item's href
+                                    // The second condition ensures child routes (e.g., /users/create) also highlight the parent link
+                                    const isActive = url === item.href || url.startsWith(`${item.href}/`);
+
                                     return (
                                         <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton asChild>
+                                            {/* Passed isActive down to the button component */}
+                                            <SidebarMenuButton asChild isActive={isActive}>
                                                 <Link href={item.href}>
                                                     <Icon />
                                                     <span>{item.title}</span>

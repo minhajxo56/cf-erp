@@ -10,7 +10,6 @@ import TextPropertiesPanel from '../Components/TextPropertiesPanel';
 import PortraitCropperModal from '../Components/PortraitCropperModal';
 
 const TEMPLATES = ['/templates/Quote-1.png', '/templates/Quote-2.png', '/templates/Quote-3.png', '/templates/Quote-4.png', '/templates/Quote-5.png', '/templates/Quote-6.png', '/templates/Quote-7.png'];
-const CROP_SIZE = 800;
 const CANVAS_WIDTH = 1600;
 const CANVAS_HEIGHT = 2000;
 
@@ -23,6 +22,13 @@ export default function QuoteEditor() {
     const cropCanvasRef = useRef<Canvas | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const portraitInputRef = useRef<HTMLInputElement>(null);
+    const hasLoadedRef = useRef(false);
+    const statusTimeoutRef = useRef<number | null>(null);
+    const pinchState = useRef<{ distance: number, scaleX: number, scaleY: number } | null>(null);
+    const cropPinchState = useRef<{ distance: number, scaleX: number, scaleY: number } | null>(null);
+    const cropImageObjRef = useRef<FabricImage | null>(null);
+    const cropSizeRef = useRef(800);
+    
     const [activeTemplate, setActiveTemplate] = useState(TEMPLATES[0]);
     const [showTemplates, setShowTemplates] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +41,25 @@ export default function QuoteEditor() {
     const [textInput, setTextInput] = useState('');
     const [fontSize, setFontSize] = useState(120);
     const [textColor, setTextColor] = useState('#ef4444');
+    const [statusMsg, setStatusMsg] = useState<string | null>(null);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ''; };
+        window.history.pushState(null, '', window.location.href);
+        const handlePopState = () => {
+            if (window.confirm("Are you sure you want to leave? Unsaved changes may be lost.")) window.history.back();
+            else window.history.pushState(null, '', window.location.href);
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('popstate', handlePopState);
+        return () => { window.removeEventListener('beforeunload', handleBeforeUnload); window.removeEventListener('popstate', handlePopState); };
+    }, []);
+
+    const showStatus = useCallback((msg: string) => {
+        setStatusMsg(msg);
+        if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
+        statusTimeoutRef.current = window.setTimeout(() => setStatusMsg(null), 2000);
+    }, []);
 
     const loadTemplateToCanvas = async (canvas: Canvas, url: string) => {
         try {
@@ -42,8 +67,7 @@ export default function QuoteEditor() {
             const scaleX = CANVAS_WIDTH / img.width;
             const scaleY = CANVAS_HEIGHT / img.height;
             const scale = Math.max(scaleX, scaleY);
-            img.set({ originX: 'center', originY: 'center', left: CANVAS_WIDTH / 2, top: CANVAS_HEIGHT / 2, scaleX: scale, scaleY: scale, selectable: false, evented: false });
-            (img as any).name = 'template';
+            img.set({ name: 'template', originX: 'center', originY: 'center', left: CANVAS_WIDTH / 2, top: CANVAS_HEIGHT / 2, scaleX: scale, scaleY: scale, selectable: false, evented: false } as any); 
             canvas.add(img);
             canvas.moveObjectTo(img, 0);
             canvas.renderAll();
@@ -67,6 +91,45 @@ export default function QuoteEditor() {
             canvasRef.current.on('selection:created', (e) => { if (e.selected?.[0] instanceof Textbox) setupTextEditor(e.selected[0] as Textbox); });
             canvasRef.current.on('selection:updated', (e) => { if (e.selected?.[0] instanceof Textbox) setupTextEditor(e.selected[0] as Textbox); else closeTextEditor(); });
             canvasRef.current.on('selection:cleared', closeTextEditor);
+
+            const upperEl = canvasRef.current.upperCanvasEl;
+            upperEl.addEventListener('touchstart', (e: TouchEvent) => {
+                if (e.touches.length === 2) {
+                    const activeObj = canvasRef.current?.getActiveObject();
+                    if (activeObj) pinchState.current = { distance: Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY), scaleX: activeObj.scaleX || 1, scaleY: activeObj.scaleY || 1 };
+                }
+            }, { passive: false });
+
+            upperEl.addEventListener('touchmove', (e: TouchEvent) => {
+                if (e.touches.length === 2 && pinchState.current) {
+                    e.preventDefault();
+                    const activeObj = canvasRef.current?.getActiveObject();
+                    if (activeObj) {
+                        const scale = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY) / pinchState.current.distance;
+                        activeObj.set({ scaleX: pinchState.current.scaleX * scale, scaleY: pinchState.current.scaleY * scale });
+                        canvasRef.current?.requestRenderAll();
+                    }
+                }
+            }, { passive: false });
+
+            const endPinch = () => { pinchState.current = null; };
+            upperEl.addEventListener('touchend', endPinch);
+            upperEl.addEventListener('touchcancel', endPinch);
+        }
+        if (!hasLoadedRef.current) {
+            hasLoadedRef.current = true;
+            const savedData = localStorage.getItem('quote_editor_quick_save');
+            if (savedData) {
+                try {
+                    const { template, canvas } = JSON.parse(savedData);
+                    await canvasRef.current.loadFromJSON(canvas);
+                    canvasRef.current.getObjects().forEach(obj => { if (obj instanceof Textbox) obj.set({ editable: false }); });
+                    canvasRef.current.renderAll();
+                    if (template) setActiveTemplate(template);
+                    setIsLoading(false);
+                    return;
+                } catch (e) { localStorage.removeItem('quote_editor_quick_save'); }
+            }
         }
         canvasRef.current.clear();
         await loadTemplateToCanvas(canvasRef.current, activeTemplate);
@@ -82,6 +145,7 @@ export default function QuoteEditor() {
 
     const handleTemplateChange = async (url: string) => {
         if (window.confirm("Changing the template will reset your current design. Are you sure?")) {
+            localStorage.removeItem('quote_editor_quick_save');
             setIsLoading(true);
             setActiveTemplate(url);
             setShowTemplates(false);
@@ -95,9 +159,7 @@ export default function QuoteEditor() {
         reader.onload = async (ev) => {
             if (ev.target?.result) {
                 const img = await FabricImage.fromURL(ev.target.result as string);
-                const scaleX = CANVAS_WIDTH / img.width;
-                const scaleY = CANVAS_HEIGHT / img.height;
-                const scale = Math.max(scaleX, scaleY);
+                const scale = Math.max(CANVAS_WIDTH / img.width, CANVAS_HEIGHT / img.height);
                 img.set({ originX: 'center', originY: 'center', left: CANVAS_WIDTH / 2, top: CANVAS_HEIGHT / 2, scaleX: scale, scaleY: scale });
                 canvasRef.current!.add(img);
                 canvasRef.current!.moveObjectTo(img, 0);
@@ -113,11 +175,36 @@ export default function QuoteEditor() {
         setCropZoom(1);
         setTimeout(async () => {
             if (!cropCanvasElRef.current) return;
-            if (!cropCanvasRef.current) cropCanvasRef.current = new Canvas(cropCanvasElRef.current, { width: window.innerWidth, height: window.innerHeight * 0.7, selection: false, backgroundColor: '#000', preserveObjectStacking: true });
+            
+            cropSizeRef.current = Math.min(window.innerWidth - 40, 800);
+            const CROP_SIZE = cropSizeRef.current;
+            
+            if (!cropCanvasRef.current) {
+                cropCanvasRef.current = new Canvas(cropCanvasElRef.current, { width: window.innerWidth, height: window.innerHeight * 0.7, selection: false, backgroundColor: '#000', preserveObjectStacking: true });
+                const upperEl = cropCanvasRef.current.upperCanvasEl;
+                upperEl.addEventListener('touchstart', (e: TouchEvent) => {
+                    if (e.touches.length === 2 && cropImageObjRef.current) cropPinchState.current = { distance: Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY), scaleX: cropImageObjRef.current.scaleX || 1, scaleY: cropImageObjRef.current.scaleY || 1 };
+                }, { passive: false });
+                upperEl.addEventListener('touchmove', (e: TouchEvent) => {
+                    if (e.touches.length === 2 && cropPinchState.current && cropImageObjRef.current) {
+                        e.preventDefault();
+                        const scale = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY) / cropPinchState.current.distance;
+                        const newScaleX = cropPinchState.current.scaleX * scale;
+                        const newScaleY = cropPinchState.current.scaleY * scale;
+                        cropImageObjRef.current.set({ scaleX: newScaleX, scaleY: newScaleY });
+                        cropCanvasRef.current?.requestRenderAll();
+                        setCropZoom(newScaleX / (cropSizeRef.current / Math.min(cropImageObjRef.current.width, cropImageObjRef.current.height)));
+                    }
+                }, { passive: false });
+                const endPinch = () => { cropPinchState.current = null; };
+                upperEl.addEventListener('touchend', endPinch);
+                upperEl.addEventListener('touchcancel', endPinch);
+            }
             const cropCanvas = cropCanvasRef.current;
             cropCanvas.clear();
             const img = await FabricImage.fromURL(dataUrl);
             setCropImageObj(img);
+            cropImageObjRef.current = img;
             const minScale = CROP_SIZE / Math.min(img.width, img.height);
             img.set({ scaleX: minScale, scaleY: minScale, left: cropCanvas.width / 2, top: cropCanvas.height / 2, originX: 'center', originY: 'center', hasControls: false, hasBorders: false, hoverCursor: 'grab', moveCursor: 'grabbing' });
             cropCanvas.add(img);
@@ -144,24 +231,26 @@ export default function QuoteEditor() {
     const handleZoom = (e: React.ChangeEvent<HTMLInputElement>) => {
         const zoom = parseFloat(e.target.value);
         setCropZoom(zoom);
-        if (cropImageObj && cropCanvasRef.current) {
-            const baseScale = CROP_SIZE / Math.min(cropImageObj.width, cropImageObj.height);
-            cropImageObj.set({ scaleX: baseScale * zoom, scaleY: baseScale * zoom });
+        if (cropImageObjRef.current && cropCanvasRef.current) {
+            const baseScale = cropSizeRef.current / Math.min(cropImageObjRef.current.width, cropImageObjRef.current.height);
+            cropImageObjRef.current.set({ scaleX: baseScale * zoom, scaleY: baseScale * zoom });
             cropCanvasRef.current.renderAll();
         }
     };
 
     const applyCrop = async () => {
-        if (!cropCanvasRef.current || !cropImageObj || !canvasRef.current) return;
+        if (!cropCanvasRef.current || !cropImageObjRef.current || !canvasRef.current) return;
         const cropCanvas = cropCanvasRef.current;
         const cx = cropCanvas.width / 2;
         const cy = cropCanvas.height / 2;
-        cropCanvas.getObjects().forEach(obj => { if (obj !== cropImageObj) obj.visible = false; });
+        const CROP_SIZE = cropSizeRef.current;
+        
+        cropCanvas.getObjects().forEach(obj => { if (obj !== cropImageObjRef.current) obj.visible = false; });
         const croppedData = cropCanvas.toDataURL({ left: cx - CROP_SIZE / 2, top: cy - CROP_SIZE / 2, width: CROP_SIZE, height: CROP_SIZE, multiplier: 2 });
         const img = await FabricImage.fromURL(croppedData);
         const radius = img.width / 2;
         img.set({ clipPath: new Circle({ radius, originX: 'center', originY: 'center' }), originX: 'center', originY: 'center' });
-        const border = new Circle({ radius, fill: 'transparent', stroke: '#fff', strokeWidth: 30, originX: 'center', originY: 'center' });
+        const border = new Circle({ radius, fill: 'transparent', stroke: '#fff', strokeWidth: 12, originX: 'center', originY: 'center' });
         const group = new Group([img, border], { left: CANVAS_WIDTH / 2, top: CANVAS_HEIGHT / 2, originX: 'center', originY: 'center', cornerColor: '#2563eb', cornerSize: 60, transparentCorners: false });
         group.scaleToWidth(CANVAS_WIDTH * 0.4);
         canvasRef.current.add(group);
@@ -173,7 +262,7 @@ export default function QuoteEditor() {
 
     const addTextObject = (defaultText: string, fill: string, topOffset: number, size: number) => {
         if (!canvasRef.current) return;
-        const text = new Textbox(defaultText, { left: CANVAS_WIDTH / 2, top: (CANVAS_HEIGHT / 2) + topOffset, width: CANVAS_WIDTH * 0.8, fill, fontSize: size, originX: 'center', originY: 'center', textAlign: 'center', fontWeight: 'bold', cornerColor: '#2563eb', cornerSize: 60, transparentCorners: false, splitByGrapheme: true });
+        const text = new Textbox(defaultText, { left: CANVAS_WIDTH / 2, top: (CANVAS_HEIGHT / 2) + topOffset, width: CANVAS_WIDTH * 0.8, fill, fontSize: size, originX: 'center', originY: 'center', textAlign: 'center', fontWeight: 'bold', cornerColor: '#2563eb', cornerSize: 60, transparentCorners: false, splitByGrapheme: true, editable: false });
         text.setControlsVisibility({ mt: false, mb: false, ml: false, mr: false });
         canvasRef.current.add(text);
         canvasRef.current.setActiveObject(text);
@@ -187,10 +276,61 @@ export default function QuoteEditor() {
     const copyImage = async () => { if (!canvasRef.current) return; canvasRef.current.discardActiveObject(); canvasRef.current.renderAll(); try { const blob = await (await fetch(canvasRef.current.toDataURL({ format: 'png', multiplier: 1 }))).blob(); await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); alert('Copied to clipboard!'); } catch (e) { alert('Copy failed.'); } };
     const shareImage = async () => { if (!canvasRef.current) return; setIsSharing(true); canvasRef.current.discardActiveObject(); canvasRef.current.renderAll(); try { const blob = await (await fetch(canvasRef.current.toDataURL({ format: 'png', multiplier: 1 }))).blob(); const file = new File([blob], 'design.png', { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Design', text: ' ' }); } else { alert('Sharing not supported.'); } } catch (e) {} setIsSharing(false); };
 
+    const handleQuickSave = useCallback(() => {
+        if (!canvasRef.current) return;
+        canvasRef.current.discardActiveObject();
+        canvasRef.current.renderAll();
+        closeTextEditor();
+        const canvasState = canvasRef.current.toObject(['name', 'selectable', 'evented']);
+        const payload = { template: activeTemplate, canvas: canvasState, timestamp: new Date().toISOString() };
+        localStorage.setItem('quote_editor_quick_save', JSON.stringify(payload));
+        showStatus('Quote and Speaker name is saved if any');
+    }, [activeTemplate, showStatus]);
+
+    const handleReset = async () => {
+        if (!canvasRef.current) return;
+        localStorage.removeItem('quote_editor_quick_save');
+        setIsLoading(true);
+        canvasRef.current.clear();
+        closeTextEditor();
+        await loadTemplateToCanvas(canvasRef.current, activeTemplate);
+        setIsLoading(false);
+        showStatus('Editor reset is done except default template.');
+    };
+
+    const handleDelete = useCallback(() => {
+        if (!canvasRef.current) return;
+        const activeObjects = canvasRef.current.getActiveObjects();
+        if (activeObjects.length) {
+            // FIXED: Casting obj to any to access the custom name property
+            activeObjects.forEach(obj => { if ((obj as any).name !== 'template') canvasRef.current?.remove(obj); });
+            canvasRef.current.discardActiveObject();
+            canvasRef.current.requestRenderAll();
+            closeTextEditor();
+            showStatus('Object deleted');
+        }
+    }, [showStatus]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Quote Editor - App Name" />
-            <div className="mx-auto w-full max-w-3xl flex-1 p-2 md:p-8 flex flex-col items-center dark:bg-gray-900 min-h-screen">
+            <div className="mx-auto w-full max-w-3xl flex-1 p-2 md:p-8 flex flex-col items-center dark:bg-gray-900 min-h-screen relative">
+                <div className="w-full text-center py-1 min-h-[28px] mb-1">
+                    {statusMsg && <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 truncate animate-pulse px-2">{statusMsg}</p>}
+                </div>
+                <div className="w-full flex justify-between items-center mb-4 min-h-[40px]">
+                    <div className="flex items-center gap-3">
+                        <button onClick={handleReset} title="Reset" className="w-10 h-10 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 active:scale-95 text-white shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                        </button>
+                        <button onClick={handleDelete} title="Delete Selected" className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-600 hover:bg-gray-700 active:scale-95 text-white shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </div>
+                    <button onClick={handleQuickSave} title="Save" className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                </div>
                 {isLoading && <div className="fixed inset-0 z-50 flex items-center justify-center dark:bg-gray-950/90 dark:text-white font-bold">Initializing...</div>}
                 {isSharing && <div className="fixed inset-0 z-50 flex items-center justify-center dark:bg-gray-950/90 dark:text-white font-bold">Preparing...</div>}
                 <EditorToolbar onTheme={() => setShowTemplates(true)} onBg={() => fileInputRef.current?.click()} onImg={() => portraitInputRef.current?.click()} onQuote={() => addTextObject('Enter Quote', '#e11d48', -200, 120)} onName={() => addTextObject('— Name', '#ffffff', 300, 80)} onCopy={copyImage} onSave={downloadImage} onPost={shareImage} bgRef={fileInputRef} imgRef={portraitInputRef} onBgUpload={handleBgUpload} onImgUpload={handlePortraitUpload} />
